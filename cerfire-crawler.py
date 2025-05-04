@@ -31,22 +31,24 @@ def main():
         # Verificar si la solicitud fue exitosa
         if response.status_code == 200:
             soup = BeautifulSoup(response.text, "html.parser")
+            # Si la tabla está vacía, recuperaremos 3 elementos en cursos_tabla que serán:
+            # 0. '\n'
+            # 1. <tr class=cabecera>...</tr>
+            # 2. '\n'
 
-            # Buscar los elementos que contienen la información de los cursos
             cursos_tabla = soup.find("tbody", {"id": "mantenimiento"})  # Ajustar según el HTML específico
             
-            #TODO
-            #Hay que contar los tr que encontramos dentro:
-                # Si solo hay uno, significa que no hay más cursos en current page
-                # Si hay más de uno, significa que hay más cursos en current page
-            # Tenemos que escapar el primer elemento, ya que es el encabezado de la tabla
-
-            if not cursos_tabla:
+            if len(cursos_tabla) <= 3:
                 finished = True
                 break
             else:
-                for curso_fila in cursos_tabla.find_all("tr"):
+                # Skip the header row and empty elements
+                for i, curso_fila in enumerate(cursos_tabla.find_all("tr")):
+                    # Skip the first 3 elements
+                    if i < 3:
+                        continue
                     datos = curso_fila.find_all("td")  # Ajustar según el HTML específico
+                    
                     if datos:
                         codigo = datos[0].text.strip()
                         titulo = datos[1].text.strip()
@@ -65,6 +67,14 @@ def main():
     else:
         print("Error al acceder a la página.")
 
+    # Guardar los cursos en un nuevo archivo CSV utilizando ; como separador
+    with open("cursos.csv", "w", encoding="utf-8") as f:
+        f.write("Código;Título;Localidad;Inicio;Fin;Horas;Estado\n")
+        for curso in cursos:
+            f.write(f"{curso.codigo};{curso.titulo};{curso.localidad};{curso.inicio};{curso.fin};{curso.horas};{curso.estado}\n")
+    print("Cursos guardados en cursos.csv")
+
 if __name__ == "__main__":
-    main()
+    main()    
+
 # Este script utiliza requests para obtener el contenido de la página y BeautifulSoup para analizar el HTML.
