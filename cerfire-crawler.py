@@ -69,7 +69,10 @@ def main():
 
     # Guardar los cursos en un nuevo archivo CSV utilizando ; como separador
     with open("cursos.csv", "w", encoding="utf-8") as f:
+        f.write(b'\xEF\xBB\xBF'.decode('utf-8'))  # Añadir BOM para UTF-8
+        # Escribir la cabecera del CSV
         f.write("Código;Título;Localidad;Inicio;Fin;Horas;Estado\n")
+        # Escribir los datos de los cursos
         for curso in cursos:
             f.write(f"{curso.codigo};{curso.titulo};{curso.localidad};{curso.inicio};{curso.fin};{curso.horas};{curso.estado}\n")
     print("Cursos guardados en cursos.csv")
